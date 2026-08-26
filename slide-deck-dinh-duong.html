@@ -1,0 +1,941 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dinh Dưỡng Cơ Bản & Ứng Dụng</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap">
+<style>
+/* ================= TOKENS ================= */
+:root{
+  --paper:#F7F9F3;
+  --surface:#FFFFFF;
+  --ink:#12281B;
+  --ink-soft:#3E5547;
+  --muted:#64796B;
+  --green:#1C6B43;
+  --green-deep:#0E3D27;
+  --green-soft:#E4EFE1;
+  --green-line:#CFDFCB;
+  --accent:#D96C2C;
+  --accent-deep:#B54E15;
+  --accent-soft:#FAE8D8;
+  --accent-on-dark:#F49B63;
+  --ok:#2E7D4F;
+  --warn:#D9A62E;
+  --bad:#BF3B2B;
+  --stage:#0C1811;
+  --shadow:0 14px 34px rgba(14,61,39,.10);
+  --r-lg:18px;--r-md:14px;
+  --sans:'Be Vietnam Pro','Segoe UI',system-ui,sans-serif;
+  --mono:'IBM Plex Mono','Consolas',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--stage);font-family:var(--sans);color:var(--ink);overflow:hidden}
+::selection{background:var(--accent);color:#fff}
+.icon{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;width:100%;height:100%}
+
+/* ================= STAGE ================= */
+.viewport{position:fixed;inset:0;display:grid;place-items:center}
+.scaler{width:1280px;height:720px;position:relative;transform-origin:center}
+.progress{position:fixed;top:0;left:0;right:0;height:4px;z-index:70;background:rgba(255,255,255,.08)}
+.progress .fill{height:100%;width:0;background:var(--accent);transition:width .35s ease}
+.stage-ui{position:fixed;z-index:70;font-family:var(--mono)}
+.navbtns{bottom:22px;right:26px;display:flex;gap:10px}
+.navbtns button{width:44px;height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#E9F2EA;font-size:20px;cursor:pointer;display:grid;place-items:center;transition:background .2s}
+.navbtns button:hover{background:rgba(255,255,255,.16)}
+.navbtns button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.counter{top:18px;right:26px;color:#9DB4A4;font-size:13px;letter-spacing:.12em}
+.hint{bottom:32px;left:26px;color:#5E7566;font-size:12px;letter-spacing:.05em;transition:opacity 1s}
+.hint.fade{opacity:0}
+
+/* ================= SLIDE BASE ================= */
+.slide{
+  position:absolute;inset:0;background:var(--paper);
+  padding:42px 60px 56px;display:none;flex-direction:column;overflow:hidden;
+}
+.slide.active{display:flex}
+.head{flex:0 0 auto}
+.eyebrow{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--green)}
+.eyebrow::before{content:"";width:9px;height:9px;background:var(--accent);border-radius:2px;flex:0 0 auto}
+.stitle{font-size:37px;font-weight:800;line-height:1.14;letter-spacing:-.01em;margin-top:10px;max-width:1080px;text-wrap:balance}
+.stitle em{font-style:normal;color:var(--accent-deep)}
+.lede{margin-top:6px;font-size:15.5px;color:var(--muted);font-weight:500}
+.body-area{flex:1;min-height:0;margin-top:22px;display:flex}
+.pagenum{position:absolute;right:30px;bottom:22px;font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;color:var(--muted)}
+
+/* ================= SHARED PIECES ================= */
+.card{background:var(--surface);border:1px solid var(--green-line);border-radius:var(--r-md);box-shadow:var(--shadow)}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:999px;background:var(--green-soft);border:1px solid var(--green-line);color:var(--green-deep);font-weight:600;font-size:13px;line-height:1.3}
+.chip.hot{background:var(--accent-soft);border-color:#EFCDAF;color:var(--accent-deep)}
+.hot{color:var(--accent-deep);font-weight:800}
+.mono{font-family:var(--mono)}
+
+/* Big Number */
+.bn{display:grid;grid-template-columns:44% 1fr;gap:48px;width:100%}
+.bn-hero{display:flex;flex-direction:column;justify-content:center}
+.bn-hero .v{font-size:188px;font-weight:900;line-height:.92;letter-spacing:-.04em;color:var(--accent)}
+.bn-hero .v small{font-size:64px;font-weight:900;letter-spacing:-.02em}
+.bn-hero .cap{margin-top:14px;font-size:23px;font-weight:800;color:var(--ink)}
+.bn-hero .sub{margin-top:6px;font-size:14.5px;color:var(--muted);font-weight:500}
+.bn-list{display:flex;flex-direction:column;justify-content:center;min-width:0}
+.li{display:flex;gap:14px;padding:12px 0;border-bottom:1px dashed var(--green-line)}
+.li:last-child{border-bottom:0}
+.li::before{content:"";flex:0 0 auto;width:10px;height:10px;border-radius:3px;background:var(--green);margin-top:7px}
+.li.acc::before{background:var(--accent)}
+.li b.lead{display:block;font-size:15.5px;font-weight:800;color:var(--ink);line-height:1.35}
+.li p{font-size:13.5px;line-height:1.45;color:var(--ink-soft);margin-top:2px}
+
+/* Scorecard KPI */
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%}
+.kpi{background:var(--surface);border:1px solid var(--green-line);border-radius:var(--r-md);padding:16px 18px;box-shadow:var(--shadow)}
+.kpi .v{font-family:var(--mono);font-weight:700;font-size:38px;line-height:1.05;color:var(--green);white-space:nowrap}
+.kpi .l{margin-top:7px;font-size:13px;font-weight:600;color:var(--muted);line-height:1.35}
+.kpi.hero{background:var(--green-deep);border-color:var(--green-deep)}
+.kpi.hero .v{color:var(--accent-on-dark)}
+.kpi.hero .l{color:#BCD6C4}
+
+/* Card grids */
+.cg{display:grid;gap:16px;width:100%}
+.cg.two{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.cg.three{grid-template-columns:repeat(3,1fr)}
+.fcard{padding:16px 18px;display:flex;flex-direction:column;gap:9px;min-height:0}
+.fh{display:flex;align-items:center;gap:11px}
+.fh .ic{flex:0 0 auto;width:36px;height:36px;border-radius:10px;background:var(--green-soft);color:var(--green-deep);padding:7px}
+.fh h3{font-size:16.5px;font-weight:800;line-height:1.25}
+.fh .k{margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--muted)}
+.fb{font-size:13.8px;line-height:1.5;color:var(--ink-soft)}
+.fb b{color:var(--ink)}
+.mini-list{display:flex;flex-direction:column;gap:5px}
+.mini-list .mi{display:flex;gap:8px;font-size:13.5px;line-height:1.4;color:var(--ink-soft)}
+.mini-list .mi::before{content:"—";color:var(--accent);font-weight:700;flex:0 0 auto}
+
+/* Split panes */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:18px;width:100%;height:100%}
+.pane{border-radius:var(--r-lg);padding:22px 26px;display:flex;flex-direction:column;gap:11px;min-height:0;justify-content:center}
+.pane.dark{background:var(--green-deep);color:#EDF5EE;box-shadow:var(--shadow)}
+.pane.light{background:var(--surface);border:1px solid var(--green-line);box-shadow:var(--shadow)}
+.pane .pk{font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#9FC3AC}
+.pane.light .pk{color:var(--muted)}
+.pane h3.bt{font-size:25px;font-weight:800;line-height:1.2}
+.pi{display:flex;gap:10px;font-size:14px;line-height:1.5;color:#CFE2D4}
+.pi::before{content:"—";color:var(--accent-on-dark);font-weight:700;flex:0 0 auto}
+.pane.light .pi{color:var(--ink-soft)}
+.pane.light .pi::before{color:var(--accent)}
+.pi b{color:inherit}
+
+/* Flow */
+.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:30px 44px;width:100%;height:100%;position:relative;align-content:stretch}
+.step{position:relative;padding:16px 16px 14px 18px;margin-top:12px}
+.step .n{position:absolute;top:-12px;left:16px;width:26px;height:26px;border-radius:50%;background:var(--green);color:#fff;font-family:var(--mono);font-size:12.5px;font-weight:600;display:grid;place-items:center}
+.step.final .n{background:var(--accent)}
+.step h4{font-size:15.5px;font-weight:800;color:var(--green-deep)}
+.step p{margin-top:5px;font-size:12.8px;line-height:1.45;color:var(--ink-soft)}
+.step::after{content:"";position:absolute;right:-31px;top:50%;transform:translateY(-50%);border-left:12px solid var(--green);border-top:8px solid transparent;border-bottom:8px solid transparent}
+.step:nth-child(3)::after,.step:nth-child(6)::after{display:none}
+.turn{position:absolute;right:14px;top:calc(50% - 34px);color:var(--green);transform:rotate(90deg);width:26px;height:26px}
+
+/* Timeline */
+.tl{position:relative;width:100%;padding-top:30px}
+.tl::before{content:"";position:absolute;top:30px;left:1.5%;right:1.5%;height:3px;background:var(--green-line);border-radius:2px}
+.tl-grid{display:grid;gap:14px}
+.tn{position:relative;padding-top:26px}
+.tn::before{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:15px;height:15px;border-radius:50%;background:#fff;border:4px solid var(--green)}
+.tn.acc::before{border-color:var(--accent)}
+.tn .t{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green-deep)}
+.tn h4{margin-top:3px;font-size:14.5px;font-weight:800;line-height:1.3}
+.tn p{margin-top:4px;font-size:12.3px;line-height:1.45;color:var(--muted)}
+.tn.center{text-align:center}
+.tn.center::before{left:50%}
+
+/* Pyramid */
+.pyr{display:flex;flex-direction:column;align-items:center;gap:10px;width:72%}
+.pl{text-align:center;padding:13px 30px;font-weight:700}
+.pl .pt{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;opacity:.85}
+.pl .pv{font-size:15px;line-height:1.35}
+.pl.l3{width:56%;background:var(--accent-soft);color:var(--accent-deep);clip-path:polygon(14% 0,86% 0,100% 100%,0 100%);border-radius:10px}
+.pl.l2{width:78%;background:var(--green-soft);color:var(--green-deep);clip-path:polygon(7% 0,93% 0,100% 100%,0 100%);border-radius:10px}
+.pl.l1{width:100%;background:var(--green-deep);color:#fff;border-radius:10px}
+.pl .big{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:.02em;color:var(--accent-on-dark)}
+
+/* Tables */
+.tblwrap{border:1px solid var(--green-line);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow);width:100%}
+table.tb{width:100%;border-collapse:collapse;background:var(--surface)}
+.tb th{background:var(--green-deep);color:#fff;font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-align:left;padding:10px 14px}
+.tb td{padding:10px 14px;font-size:13.6px;line-height:1.42;border-top:1px solid var(--green-line);vertical-align:top;color:var(--ink-soft)}
+.tb tr:nth-child(even) td{background:#F2F7F0}
+.tb td b{color:var(--ink)}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px;vertical-align:-1px}
+
+/* Bars */
+.bar{position:relative;height:38px;border-radius:9px;background:var(--green-soft);overflow:hidden}
+.bar .fillb{position:absolute;inset:0 auto 0 0;border-radius:9px;display:flex;align-items:center;justify-content:flex-end;padding-right:12px;color:#fff;font-family:var(--mono);font-weight:700;font-size:15px}
+.bar.g .fillb{background:var(--green)}
+.bar.o .fillb{background:var(--bad)}
+.blab{margin-bottom:6px;font-size:13.5px;font-weight:700;color:var(--ink-soft)}
+
+/* Bottom band */
+.band{flex:0 0 auto;margin-top:14px;background:var(--surface);border:1px solid var(--green-line);border-radius:var(--r-md);padding:12px 18px;display:flex;align-items:center;gap:14px;font-size:13.5px;color:var(--ink-soft)}
+.band .bi{flex:0 0 auto;width:22px;height:22px;color:var(--green)}
+.band b{color:var(--ink)}
+
+/* Cover & closing */
+.center-stage{flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;position:relative}
+.deco{position:absolute;color:var(--green);opacity:.14;pointer-events:none}
+.cover-title{font-size:64px;font-weight:900;line-height:1.08;letter-spacing:-.015em;text-wrap:balance}
+.cover-sub{margin-top:18px;font-size:18px;font-weight:600;color:var(--ink-soft)}
+.cover-note{margin-top:8px;font-size:14.5px;color:var(--muted)}
+.stat-side{position:absolute;right:0;top:50%;transform:translateY(-50%);text-align:right}
+.stat-side .sv{font-family:var(--mono);font-size:120px;font-weight:700;line-height:.95;color:var(--accent)}
+.stat-side .sl{font-size:16px;font-weight:700;color:var(--green-deep);margin-top:4px}
+.stat-side .ss{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+@media print{
+  body{overflow:visible;background:#fff}
+  .viewport{position:static;display:block}
+  .scaler{transform:none!important;width:auto;height:auto}
+  .slide{position:relative;display:flex!important;page-break-after:always;break-after:page;inset:auto}
+  .progress,.stage-ui{display:none!important}
+  @page{size:1280px 720px;margin:0}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<div class="viewport"><div class="scaler">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3c3.4 4 6 7.2 6 10a6 6 0 1 1-12 0c0-2.8 2.6-6 6-10z"/></symbol>
+<symbol id="i-bowl" viewBox="0 0 24 24"><path d="M4 13a8 8 0 0 0 16 0H4z"/><path d="M9 9V6M15 9V6"/></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c2 3 5 5.2 5 9a5 5 0 0 1-10 0c0-2.4 1.6-4 2.6-5.4.4 1 1.4 1.7 1.4 1.7C11.4 6.6 11.6 4.6 12 3z"/></symbol>
+<symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l2-5 4 10 2-5h6"/></symbol>
+<symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 5v15M8 20h8M4 9h16"/><path d="M6 9l-2 5h4l-2-5zM18 9l-2 5h4l-2-5z"/></symbol>
+<symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19C7 10 13 5 20 4c-.5 7-5 13-15 15z"/><path d="M5 19c3-5 7-9 11-11"/></symbol>
+<symbol id="i-cell" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-pill" viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="7" rx="3.5" transform="rotate(-30 12 12)"/><path d="M10 14.8l4-6.6"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 21 19H3z"/><path d="M12 10v4M12 16.5v.01"/></symbol>
+<symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".5"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2z"/><path d="M12 6v14"/></symbol>
+<symbol id="i-q" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 1-1 1.7"/><path d="M12 16.5v.01"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M12 4v3m0 10v3M4 12h3m10 0h3M6.3 6.3l2.1 2.1m7.2 7.2 2.1 2.1M17.7 6.3 15.6 8.4M8.4 15.6l-2.1 2.1"/></symbol>
+<symbol id="i-grain" viewBox="0 0 24 24"><path d="M12 21V9"/><path d="M12 9c0-3-2-5-4-5 0 3 1.5 4.5 4 5zm0 0c0-3 2-5 4-5 0 3-1.5 4.5-4 5zm0 4c0-3-2-5-4-5 0 3 1.5 4.5 4 5zm0 0c0-3 2-5 4-5 0 3-1.5 4.5-4 5z"/></symbol>
+<symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7.5h6M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+<symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+</defs></svg>
+
+<!-- SLIDE 1 · COVER -->
+<section class="slide active" id="s1">
+  <svg class="deco" style="width:340px;height:340px;left:-70px;bottom:-80px" aria-hidden="true"><use href="#i-leaf" class="icon"/></svg>
+  <svg class="deco" style="width:220px;height:220px;right:330px;top:-60px;transform:scaleX(-1)" aria-hidden="true"><use href="#i-leaf" class="icon"/></svg>
+  <div class="center-stage">
+    <div class="eyebrow" style="justify-content:center">Workshop · Huấn luyện viên dinh dưỡng &amp; chăm sóc sức khỏe</div>
+    <div style="margin-top:26px;font-size:64px;font-weight:900;line-height:1.1;letter-spacing:-.015em;text-wrap:balance">Dinh dưỡng cơ bản<br><span style="color:var(--green)">và ứng dụng</span></div>
+    <div class="cover-sub">PGS.TS.BS. Thầy thuốc ưu tú Nguyễn Viết Lượng — Nhà xuất bản Y học</div>
+    <div class="cover-note">Hệ thống hóa kiến thức dinh dưỡng dễ hiểu, gần gũi — ứng dụng ngay vào đời sống hàng ngày</div>
+    <div style="margin-top:26px;display:flex;gap:12px;justify-content:center">
+      <span class="chip hot" style="font-size:14.5px;padding:9px 18px">19 chương nền tảng</span>
+      <span class="chip" style="font-size:14.5px;padding:9px 18px">Phần FAQ</span>
+      <span class="chip" style="font-size:14.5px;padding:9px 18px">Ứng dụng ngay</span>
+    </div>
+    <div class="stat-side">
+      <div class="sv">19</div>
+      <div class="sl">chương nền tảng</div>
+      <div class="ss">+ FAQ dành cho HLV dinh dưỡng</div>
+    </div>
+  </div>
+  <div class="pagenum">01 / 23</div>
+</section>
+
+<!-- SLIDE 2 · LỘ TRÌNH -->
+<section class="slide" id="s2">
+  <header class="head">
+    <div class="eyebrow">Lộ trình buổi học</div>
+    <h1 class="stitle">Hành trình <em>6 chặng</em> từ nghề HLV đến ứng dụng</h1>
+  </header>
+  <div class="body-area" style="align-items:center">
+    <div class="tl">
+      <div class="tl-grid" style="grid-template-columns:repeat(6,1fr)">
+        <div class="tn center"><div class="t mono" style="font-size:26px;color:var(--green)">01</div><h4>Nghề huấn luyện viên</h4><p>Chương 1<br>Sứ mệnh · Nutrition Club</p></div>
+        <div class="tn acc center"><div class="t mono" style="font-size:26px;color:var(--accent-deep)">02</div><h4>Tiêu hóa &amp; vai trò DD</h4><p>Chương 2–3<br>Dinh dưỡng quyết định <b class="hot">80%</b></p></div>
+        <div class="tn center"><div class="t mono" style="font-size:26px;color:var(--green)">03</div><h4>Nhu cầu cơ thể</h4><p>Chương 4–8<br>Nước · 5 bữa ăn · Calo · GI/GL · Tế bào</p></div>
+        <div class="tn center"><div class="t mono" style="font-size:26px;color:var(--green)">04</div><h4>Các chất dinh dưỡng</h4><p>Chương 9–17<br><b>9 chương</b> đa lượng &amp; vi lượng</p></div>
+        <div class="tn center"><div class="t mono" style="font-size:26px;color:var(--green)">05</div><h4>Hành vi &amp; vận động</h4><p>Chương 18–19<br>Đói/thèm ăn · Kết hợp tập luyện</p></div>
+        <div class="tn acc center"><div class="t mono" style="font-size:26px;color:var(--accent-deep)">06</div><h4>FAQ &amp; kết luận</h4><p><b class="hot">8 câu hỏi</b> thực tế<br>+ Thông điệp kết</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="band"><svg class="bi"><use href="#i-book" class="icon"/></svg><span><b>Mạch bài:</b> Mở đầu (1–3) → Bối cảnh (4–5) → Nội dung chính (6–21) → Đánh giá/Q&amp;A (22) → Kết luận (23)</span></div>
+  <div class="pagenum">02 / 23</div>
+</section>
+
+<!-- SLIDE 3 · NGHỀ HLV -->
+<section class="slide" id="s3">
+  <header class="head">
+    <div class="eyebrow">Chương 1 · Nghề huấn luyện viên dinh dưỡng</div>
+    <h1 class="stitle">HLV dinh dưỡng: mang kiến thức, không chỉ kết quả</h1>
+  </header>
+  <div class="body-area">
+    <div class="split">
+      <div class="pane dark">
+        <div class="pk">Trái — Nhiệm vụ kép</div>
+        <h3 class="bt">Kết quả <span style="color:var(--accent-on-dark)">+</span> Kiến thức</h3>
+        <div class="pi"><span><b>Kết quả sức khỏe tốt nhất:</b> cân nặng · cấu trúc cơ thể · chất lượng cuộc sống</span></div>
+        <div class="pi"><span><b>Truyền kiến thức chủ động:</b> dinh dưỡng · vận động · lối sống — cho khách hàng &amp; hội viên</span></div>
+        <div class="pi"><span><b>Sứ mệnh:</b> cộng đồng và thế giới lành mạnh hơn, khỏe mạnh hơn</span></div>
+      </div>
+      <div class="pane light">
+        <div class="pk">Phải — Môi trường ứng dụng</div>
+        <h3 class="bt" style="color:var(--green-deep)">Nutrition Club</h3>
+        <div class="pi"><span>Môi trường do <b>chính HLV tạo ra</b> để hội viên cùng nhau thay đổi</span></div>
+        <div class="pi"><span>Hình thành <b>thói quen tốt</b> cho sức khỏe, lâu dài</span></div>
+        <div class="pi"><span>Định hướng một <b>lối sống năng động, lành mạnh</b></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="band" style="justify-content:space-between;gap:22px">
+    <span><b>Điều kiện tiên quyết:</b> kiến thức khoa học — sức khỏe · dinh dưỡng (đặc biệt quan trọng) · vận động · lối sống</span>
+    <span><b>Phương pháp học:</b> bài ngắn gọn · nhấn mạnh đóng khung · hình ảnh minh họa · áp dụng ngay sau mỗi bài</span>
+  </div>
+  <div class="pagenum">03 / 23</div>
+</section>
+
+<!-- SLIDE 4 · HỆ TIÊU HÓA -->
+<section class="slide" id="s4">
+  <header class="head">
+    <div class="eyebrow">Chương 2 · Hệ tiêu hóa</div>
+    <h1 class="stitle">Thức ăn hoàn thành hành trình <em>24 giờ</em> trong cơ thể</h1>
+  </header>
+  <div class="body-area" style="align-items:center">
+    <div class="flow">
+      <div class="step card"><div class="n">1</div><h4>Khoang miệng</h4><p>Răng cắt nghiền thức ăn · men <b>Amylase</b> nước bọt chuyển tinh bột thành đường · lưỡi trộn đều</p></div>
+      <div class="step card"><div class="n">2</div><h4>Dạ dày</h4><p>Axit HCl <b>pH 1,5–3,0</b> diệt khuẩn, ký sinh trùng · Pepsinogen tiêu đạm · mucin bảo vệ</p></div>
+      <div class="step card"><div class="n">3</div><h4>Tá tràng</h4><p>Mật (tính kiềm) trung hòa axit, phân giải chất béo · men tụy tiêu tinh bột — đạm — béo</p></div>
+      <div class="step card"><div class="n">4</div><h4>Ruột non</h4><p>Vi nhung mao tăng bề mặt — hấp thu <b>chủ yếu</b>: đường đơn · axit amin · axit béo · vitamin vào máu</p></div>
+      <div class="step card"><div class="n">5</div><h4>Ruột già</h4><p>Vi khuẩn lên men chất xơ · hấp thu nước &amp; vitamin còn lại · tạo thành phân có khuôn</p></div>
+      <div class="step final card"><div class="n">6</div><h4>Trực tràng — hậu môn</h4><p>Bóng trực tràng chứa đủ lớn → <b>phản xạ đi ngoài</b>; cơ hậu môn giãn, tống phân ra ngoài</p></div>
+    </div>
+  </div>
+  <div class="band">
+    <svg class="bi"><use href="#i-clock" class="icon"/></svg>
+    <span><b>Toàn trình trung bình 24 giờ.</b> Bình thường: đi ngoài <b class="hot">1 lần/ngày</b> · đánh giá cả tính chất phân &amp; cảm giác — không chỉ số lần</span>
+  </div>
+  <div class="pagenum">04 / 23</div>
+</section>
+
+<!-- SLIDE 5 · VAI TRÒ DINH DƯỠNG -->
+<section class="slide" id="s5">
+  <header class="head">
+    <div class="eyebrow">Chương 3 · Vai trò của dinh dưỡng</div>
+    <h1 class="stitle">Dinh dưỡng quyết định <em>80%</em> sức khỏe của bạn</h1>
+  </header>
+  <div class="body-area">
+    <div class="bn">
+      <div class="bn-hero">
+        <div class="v">80<small>%</small></div>
+        <div class="cap">Dinh dưỡng (Nutrition)</div>
+        <div class="sub">so với Vận động (Workout): chỉ 20% vai trò quyết định</div>
+      </div>
+      <div class="bn-list">
+        <div class="li acc"><span><b class="lead">Dinh dưỡng + vận động = <span class="hot">70%</span> sức khỏe</b><p>Còn lại: di truyền · môi trường sống · nghề nghiệp · tâm tính</p></span></div>
+        <div class="li"><span><b class="lead">6 vai trò của dinh dưỡng</b><p>tăng cường sức khỏe · kiểm soát cân nặng · dự phòng bệnh · hỗ trợ điều trị · chống lão hóa · nâng cao chất lượng cuộc sống</p></span></div>
+        <div class="li"><span><b class="lead">“Vạn bệnh vào từ miệng” — “Thức ăn là vị thuốc”</b><p>Hải Thượng Lãn Ông (Y học cổ truyền) · Hippocrates (Y học thế giới)</p></span></div>
+        <div class="li"><span><b class="lead">4 cấp độ ăn uống: sống → no → ngon → <span class="hot">khỏe mạnh</span></b><p>Ăn để khỏe, sống lâu, ít bệnh, nâng tầm chất lượng sống — triết lý hiện đại: cân bằng · an toàn · tế bào</p></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="pagenum">05 / 23</div>
+</section>
+<!-- SLIDE 6 · NƯỚC -->
+<section class="slide" id="s6">
+  <header class="head">
+    <div class="eyebrow">Chương 4 · Nước — chất dinh dưỡng số 1</div>
+    <h1 class="stitle">Nước — dinh dưỡng số 1, uống đúng mỗi ngày</h1>
+  </header>
+  <div class="body-area" style="flex-direction:column;gap:14px">
+    <div class="kpis">
+      <div class="kpi hero"><div class="v">~70%</div><div class="l">Người trưởng thành là nước</div></div>
+      <div class="kpi"><div class="v">~75%</div><div class="l">Trẻ em</div></div>
+      <div class="kpi"><div class="v">~65%</div><div class="l">Người già</div></div>
+      <div class="kpi"><div class="v">~85%</div><div class="l">Não bộ là nước</div></div>
+      <div class="kpi"><div class="v">0,4L<span style="font-size:19px;color:var(--muted)">/10kg/24h</span></div><div class="l">Lượng khuyến nghị — gồm cả nước trong thức ăn</div></div>
+      <div class="kpi"><div class="v">6–8h</div><div class="l">Ngủ đêm — cần bổ sung trước để tránh mất nước</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1">
+      <div class="fcard" style="gap:5px">
+        <div class="fh" style="color:var(--bad)"><svg class="ic" style="background:#F7E3DF;color:var(--bad)"><use href="#i-alert" class="icon"/></svg><h3>Thiếu nước</h3></div>
+        <div class="fb">Tụt huyết áp, trụy tim mạch · sỏi thận, táo bón · khô khớp, thoái hóa · da lão hóa nhanh · không giảm/ không tăng được cân</div>
+      </div>
+      <div class="fcard" style="gap:5px">
+        <div class="fh" style="color:var(--accent-deep)"><svg class="ic" style="background:var(--accent-soft);color:var(--accent-deep)"><use href="#i-drop" class="icon"/></svg><h3>Thừa nước</h3></div>
+        <div class="fb">Vượt ngưỡng lọc của thận: tăng huyết áp, suy tim · phù phổi · phù nề ngoại vi · ngộ độc tế bào</div>
+      </div>
+    </div>
+  </div>
+  <div class="band">
+    <svg class="bi"><use href="#i-clock" class="icon"/></svg>
+    <span><b>Uống khi CHƯA khát</b> · chia nhiều lần, uống từ từ · <b>8 thời điểm vàng:</b> sau khi dậy · sau tập · 30 phút trước bữa ăn · trước tắm/bơi · trước khi ngủ · khi mệt · khi sốt · chăm người ốm. <span class="hot">Sai lầm:</span> thay nước bằng bia, rượu, nước ngọt</span>
+  </div>
+  <div class="pagenum">06 / 23</div>
+</section>
+
+<!-- SLIDE 7 · 5 BỮA ĂN -->
+<section class="slide" id="s7">
+  <header class="head">
+    <div class="eyebrow">Chương 5 · Các bữa ăn trong ngày</div>
+    <h1 class="stitle">Ăn <em>5 bữa/ngày</em> — san sẻ tải cho tiêu hóa</h1>
+  </header>
+  <div class="body-area" style="align-items:center">
+    <div class="tl">
+      <div class="tl-grid" style="grid-template-columns:repeat(5,1fr)">
+        <div class="tn acc center"><div class="t mono" style="font-size:22px;color:var(--accent-deep)">6h–8h</div><h4>Bữa sáng<br><span style="font-size:11.5px;color:var(--accent-deep)">QUAN TRỌNG NHẤT</span></h4><p>Shake ~300ml + ngô/khoai + cá/thịt + rau quả<br><b class="hot">200–300 kcal</b></p></div>
+        <div class="tn center"><div class="t mono" style="font-size:22px;color:var(--green-deep)">9h30–10h30</div><h4>Bữa phụ sáng</h4><p>Trái cây: táo · ổi · chuối…<br><b>~100 kcal</b></p></div>
+        <div class="tn center"><div class="t mono" style="font-size:22px;color:var(--green-deep)">11h30–12h30</div><h4>Bữa trưa<br><span style="font-size:11.5px;color:var(--muted)">chính thứ 2</span></h4><p>Gạo lứt + đạm + đậu/trứng + rau + trái cây — đa dạng, cân bằng</p></div>
+        <div class="tn center"><div class="t mono" style="font-size:22px;color:var(--green-deep)">16h–17h</div><h4>Bữa phụ chiều<br><span style="font-size:11.5px;color:var(--muted)">“bữa ăn cho tế bào”</span></h4><p>Shake <b>~100 kcal</b> — năng lượng cuối ngày, hỗ trợ tập luyện</p></div>
+        <div class="tn acc center"><div class="t mono" style="font-size:22px;color:var(--accent-deep)">19h–20h</div><h4>Bữa tối<br><span style="font-size:11.5px;color:var(--muted)">chính thứ 3</span></h4><p>Ít hơn trưa (<b>2/3 bát</b>) · dễ tiêu · <b class="hot">không ăn sau 20h</b></p></div>
+      </div>
+    </div>
+  </div>
+  <div class="band">
+    <svg class="bi"><use href="#i-bowl" class="icon"/></svg>
+    <span><b>No mức 70%.</b> Shake lành mạnh: ~100 kcal · GL 5–9g · GI 17–29 · ~30 dưỡng chất (21 vitamin &amp; khoáng). <span class="hot">Bỏ bữa sáng →</span> hạ đường máu, giảm chuyển hóa, ăn bù tích mỡ nội tạng</span>
+  </div>
+  <div class="pagenum">07 / 23</div>
+</section>
+
+<!-- SLIDE 8 · CALO -->
+<section class="slide" id="s8">
+  <header class="head">
+    <div class="eyebrow">Chương 6 · Calo và cân bằng calo</div>
+    <h1 class="stitle">Kiểm soát calo: <em>7.000 kcal</em> thừa bằng 1kg mỡ</h1>
+  </header>
+  <div class="body-area">
+    <div class="cg two">
+      <div class="fcard card">
+        <div class="fh"><svg class="ic"><use href="#i-scale" class="icon"/></svg><h3>Cân bằng calo</h3><span class="k">01</span></div>
+        <div class="fb"><b>Tổng calo = CHCB + Hoạt động + Xử lý thức ăn.</b> Cung cấp = tiêu thụ → ổn định; thiếu calo → lấy từ mỡ dự trữ, giảm cân</div>
+        <div class="fb">Thừa <b class="hot">7.000 kcal → +1kg mỡ</b>. Kiểm soát calo — <b>không</b> cắt giảm thức ăn hay bỏ bữa</div>
+      </div>
+      <div class="fcard card">
+        <div class="fh"><svg class="ic"><use href="#i-flame" class="icon"/></svg><h3>Chuyển hóa cơ bản (CHCB)</h3><span class="k">02</span></div>
+        <div class="mini-list">
+          <div class="mi"><span>Đơn giản: <b>1 (nam) · 0,9 (nữ)</b> × cân nặng (kg) × 24 giờ</span></div>
+          <div class="mi"><span>Harris-Benedict: đủ <b>W – H – A</b> (cân nặng · chiều cao · tuổi)</span></div>
+          <div class="mi"><span>Năng lượng dự trữ lấy từ <b>gan · cơ · tổ chức mỡ</b> khi thiếu cung cấp</span></div>
+        </div>
+      </div>
+      <div class="fcard card">
+        <div class="fh"><svg class="ic"><use href="#i-pulse" class="icon"/></svg><h3>Calo hoạt động</h3><span class="k">03</span></div>
+        <div class="fb">Theo tính chất lao động (% CHCB): Tĩnh tại <b>20%</b> · Nhẹ <b>30%</b> · Trung bình <b>40%</b> · Nặng <b>50%</b> — nữ thấp hơn nam <b>~5%</b></div>
+        <div class="fb">Xử lý thức ăn chiếm <b class="hot">5–10% CHCB</b></div>
+      </div>
+      <div class="fcard card">
+        <div class="fh"><svg class="ic"><use href="#i-bowl" class="icon"/></svg><h3>Calo thực phẩm / 100g</h3><span class="k">04</span></div>
+        <div class="fb">Gạo trắng <b>345</b> · Phở, bún, mì <b>350</b> · Trứng gà <b>166</b> · Thịt lợn nạc <b>139</b> · Ức gà <b>110</b> · Cá nạc <b>80</b> · Khoai lang <b>120</b> kcal</div>
+        <div class="fb">Nước lọc <b class="hot">0 kcal</b> · tránh thực phẩm “calo rỗng” — nhiều calo, nghèo dưỡng chất</div>
+      </div>
+    </div>
+  </div>
+  <div class="pagenum">08 / 23</div>
+</section>
+
+<!-- SLIDE 9 · GI & GL -->
+<section class="slide" id="s9">
+  <header class="head">
+    <div class="eyebrow">Chương 7 · Chỉ số GI &amp; GL</div>
+    <h1 class="stitle">Chọn thực phẩm theo đèn giao thông <em>GI</em></h1>
+  </header>
+  <div class="body-area" style="flex-direction:column;gap:13px">
+    <div class="tblwrap">
+      <table class="tb">
+        <tr><th style="width:15%">Đèn · GI</th><th style="width:47%">Thực phẩm tiêu biểu</th><th>Lời khuyên</th></tr>
+        <tr><td><b><span class="dot" style="background:var(--bad)"></span>70–100</b></td><td>Bánh kẹo · nước ngọt · trà sữa · mật ong · bánh mì trắng · xôi nếp · cơm trắng · khoai tây · dưa hấu</td><td><b>Tránh hoặc hạn chế</b></td></tr>
+        <tr><td><b><span class="dot" style="background:var(--warn)"></span>56–69</b></td><td>Gạo lứt · yến mạch · khoai sọ · chuối · nho · đu đủ · bánh mì ngũ cốc · mì ống</td><td><b>Ăn vừa phải</b></td></tr>
+        <tr><td><b><span class="dot" style="background:var(--ok)"></span>≤55</b></td><td>Rau xanh · đậu Hà Lan · cam · táo · bưởi · đào · sữa tươi không đường · đậu nành</td><td><b>Khuyến khích</b> theo nhu cầu</td></tr>
+      </table>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
+      <div class="fcard card" style="gap:5px">
+        <div class="fh"><svg class="ic"><use href="#i-pulse" class="icon"/></svg><h3>GI cao xảy ra gì?</h3></div>
+        <div class="fb">Đường tăng vọt → insulin bùng phát → tụt nhanh dưới mức bình thường: <b>“đói đường sau ăn”</b> · tích mỡ · nguy cơ <b>tiểu đường tuýp 2</b>. GI thấp → năng lượng bền vững, bảo vệ tim mạch</div>
+      </div>
+      <div class="fcard card" style="gap:5px">
+        <div class="fh"><svg class="ic"><use href="#i-target" class="icon"/></svg><h3>GL — tải đường khẩu phần</h3></div>
+        <div class="fb">Thấp <b>&lt;10</b> · trung bình <b>11–19</b> · cao <b>≥20</b>. Dưa hấu GI <b>72–80</b> nhưng một lát chỉ GL <b class="hot">4–5</b>. Tiểu đường: chọn GI thấp + tổng GL/ngày <b class="hot">≤ 80g</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="pagenum">09 / 23</div>
+</section>
+
+<!-- SLIDE 10 · DINH DƯỠNG TẾ BÀO -->
+<section class="slide" id="s10">
+  <header class="head">
+    <div class="eyebrow">Chương 8 · Dinh dưỡng tế bào</div>
+    <h1 class="stitle">Vi nhung mao tổn thương: hấp thu rơi còn <em>5%</em></h1>
+  </header>
+  <div class="body-area" style="flex-direction:column;gap:14px">
+    <div class="split" style="height:auto;flex:0 0 auto">
+      <div class="pane light" style="padding:18px 22px">
+        <div class="pk">“Cánh cửa” dinh dưỡng — ruột non</div>
+        <div class="blab">Vi nhung mao khỏe mạnh</div>
+        <div class="bar g"><div class="fillb" style="width:92%">70–100%</div></div>
+        <div style="margin-top:12px" class="blab">Vi nhung mao tổn thương</div>
+        <div class="bar o"><div class="fillb" style="width:34%">5–50%</div></div>
+        <div class="fb" style="margin-top:10px">Tổn thương → <b>suy dinh dưỡng dù ăn nhiều</b>, độc tố lọt vào máu</div>
+      </div>
+      <div class="pane dark" style="padding:18px 22px">
+        <div class="pk">3 lợi ích vượt trội</div>
+        <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:2px">
+          <span class="chip hot" style="background:rgba(244,155,99,.16);border-color:rgba(244,155,99,.4);color:var(--accent-on-dark)">Hấp thu tối ưu</span>
+          <span class="chip hot" style="background:rgba(244,155,99,.16);border-color:rgba(244,155,99,.4);color:var(--accent-on-dark)">Phục hồi vi nhung mao</span>
+          <span class="chip hot" style="background:rgba(244,155,99,.16);border-color:rgba(244,155,99,.4);color:var(--accent-on-dark)">Thanh lọc cơ thể</span>
+        </div>
+        <div class="pi" style="margin-top:6px"><span><b>Giải pháp nuôi tế bào:</b> shake ~30 dưỡng chất dễ hấp thu · vitamin &amp; khoáng · lô hội làm sạch đường ruột · chất xơ đào thải độc tố · lợi khuẩn cân bằng hệ vi sinh</span></div>
+      </div>
+    </div>
+    <div class="band">
+      <svg class="bi"><use href="#i-ban" class="icon"/></svg>
+      <span><b>Nguyên nhân tổn thương vi nhung mao:</b> rượu bia, thuốc lá, chất kích thích · kháng sinh, thuốc Tây kéo dài · thực phẩm bẩn nhiều phụ gia · ô nhiễm môi trường · stress, mất ngủ. <b>Tế bào khỏe → cơ thể khỏe;</b> tế bào bệnh tật → bệnh lý nan y</span>
+    </div>
+  </div>
+  <div class="pagenum">10 / 23</div>
+</section>
+
+<!-- SLIDE 11 · ĐA LƯỢNG & VI LƯỢNG -->
+<section class="slide" id="s11">
+  <header class="head">
+    <div class="eyebrow">Chương 9 · Thực phẩm đa lượng &amp; vi lượng</div>
+    <h1 class="stitle"><em>50-30-20</em>: tỷ lệ vàng calo đa lượng người Việt</h1>
+  </header>
+  <div class="body-area" style="flex-direction:column;align-items:center;justify-content:center;gap:20px">
+    <div class="pyr">
+      <div class="pl l3"><div class="pt">Tầng đỉnh · Phytonutrients</div><div class="pv">Dưỡng chất thực vật chống oxy hóa — lượng cực nhỏ, bảo vệ dài hạn</div></div>
+      <div class="pl l2"><div class="pt">Tầng giữa · Vi lượng “sinh tồn”</div><div class="pv">Vitamin tan dầu A-D-E-K · tan nước nhóm B + C — Khoáng: đa lượng &gt;250mg/ngày · vi lượng &lt;20mg/ngày. <b>Thiếu → suy yếu, bệnh tật</b></div></div>
+      <div class="pl l1"><div class="pt">Tầng đáy · Đa lượng — nền năng lượng</div><div class="big">G 50% · P 30% · L 20%</div><div class="pv" style="opacity:.92;font-weight:500;font-size:13.5px">Đường bột tốt ≥80% · đạm thực vật 70–80% · chất béo tốt ≥80% — cấp năng lượng, xây tế bào, tạo hormone &amp; kháng thể</div></div>
+    </div>
+    <div class="band" style="width:100%">
+      <svg class="bi"><use href="#i-grain" class="icon"/></svg>
+      <span><b>Khuyến nghị:</b> ăn phong phú <b class="hot">15–20 loại thực phẩm/ngày</b> · hầu hết vitamin — khoáng không tự tổng hợp được (trừ vitamin D từ ánh nắng)</span>
+    </div>
+  </div>
+  <div class="pagenum">11 / 23</div>
+</section>
+<!-- SLIDE 12 · ĐƯỜNG BỘT & CHẤT XƠ -->
+<section class="slide" id="s12">
+  <header class="head">
+    <div class="eyebrow">Chương 10 · Chất đường bột &amp; chất xơ</div>
+    <h1 class="stitle"><em>25g chất xơ/ngày</em> — ổn định đường huyết</h1>
+  </header>
+  <div class="body-area">
+    <div class="bn" style="grid-template-columns:38% 1fr">
+      <div class="bn-hero">
+        <div class="v">25<small>g</small></div>
+        <div class="cap">chất xơ mỗi ngày</div>
+        <div class="sub">tận dụng lớp vỏ rau củ — giàu xơ &amp; chống oxy hóa nhất · có thể bổ sung dạng bột nếu thiếu</div>
+      </div>
+      <div class="bn-list">
+        <div class="li acc"><span><b class="lead"><span class="hot">4 kcal/g</span> Glucose — não dùng sớm &amp; nhiều nhất</b><p>Dư thừa → Glycogen ở gan, cơ hoặc chuyển thành mỡ</p></span></div>
+        <div class="li"><span><b class="lead">Đường bột tốt ≥80% vs tinh chế</b><p>Nguyên cám, gạo lứt, đậu — GI thấp, giải phóng từ từ · gạo trắng, bánh mì trắng, nước ngọt — GI cao → béo phì, tiểu đường</p></span></div>
+        <div class="li"><span><b class="lead">Đường tự nhiên ≠ đường tự do</b><p>Tự nhiên có xơ đi kèm (sữa, trái cây) · tự do = “calo rỗng” (đường cát, mật ong, nước ép) → ăn trái cây cả vỏ thay vì ép nước</p></span></div>
+        <div class="li"><span><b class="lead">Xơ hòa tan + không hòa tan</b><p>Hòa tan (táo, lê, ổi, củ): mềm phân, giảm cholesterol · không hòa tan (rau xanh, măng, vỏ cùi): tạo khuôn phân, chặn hấp thu béo xấu</p></span></div>
+        <div class="li"><span><b class="lead">Thức ăn cho lợi khuẩn</b><p>Giảm nguy cơ tim mạch · tiểu đường · béo phì · ung thư đại trực tràng</p></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="pagenum">12 / 23</div>
+</section>
+
+<!-- SLIDE 13 · PROTEIN -->
+<section class="slide" id="s13">
+  <header class="head">
+    <div class="eyebrow">Chương 11 · Chất đạm Protein</div>
+    <h1 class="stitle">Protein: <em>1g mỗi kg cân nặng</em> mỗi ngày</h1>
+  </header>
+  <div class="body-area" style="flex-direction:column;gap:14px">
+    <div class="kpis">
+      <div class="kpi"><div class="v">21</div><div class="l">Loại acid amin trong cơ thể</div></div>
+      <div class="kpi"><div class="v">9</div><div class="l">Acid amin thiết yếu — chỉ lấy từ thức ăn</div></div>
+      <div class="kpi hero"><div class="v">1g/kg/24h</div><div class="l">Nhu cầu trung bình — thay đổi theo tuổi, giới, công việc</div></div>
+      <div class="kpi"><div class="v">30%</div><div class="l">% tổng calo trong ngày từ protein</div></div>
+      <div class="kpi"><div class="v">70–80<span style="font-size:19px;color:var(--muted)"> : </span>20–30</div><div class="l">Đạm thực vật : động vật (%)</div></div>
+      <div class="kpi"><div class="v">32g</div><div class="l">Đạm / 100g đậu nành</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1">
+      <div class="fcard card" style="gap:5px">
+        <div class="fh"><svg class="ic"><use href="#i-cell" class="icon"/></svg><h3>Vai trò sống còn</h3></div>
+        <div class="fb">Tạo cơ bắp, sửa chữa mô · màng tế bào · ADN · hormone · dẫn truyền thần kinh · kháng thể — kiểm soát cơn đói. Loại trừ nước: chiếm <b>~nửa trọng lượng cơ thể</b></div>
+      </div>
+      <div class="fcard card" style="gap:5px">
+        <div class="fh"><svg class="ic"><use href="#i-shield" class="icon"/></svg><h3>Chọn nguồn đạm</h3></div>
+        <div class="fb">Ưu tiên <b>cá</b> (máu lạnh 16–17°C, mỡ không đông vón) &amp; <b>thịt trắng</b> · thịt đỏ vừa phải — tránh hun khói · <b class="hot">nấm &amp; đậu nành thay thế thịt rất tốt</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="pagenum">13 / 23</div>
+</section>
+
+<!-- SLIDE 14 · LIPID -->
+<section class="slide" id="s14">
+  <header class="head">
+    <div class="eyebrow">Chương 12 · Chất béo Lipid</div>
+    <h1 class="stitle">Não <em>60%</em> là chất béo — chọn đúng, không né</h1>
+  </header>
+  <div class="body-area" style="flex-direction:column;gap:13px">
+    <div class="cg two" style="flex:1">
+      <div class="fcard card">
+        <div class="fh"><svg class="ic"><use href="#i-drop" class="icon"/></svg><h3>Vai trò</h3><span class="k">01</span></div>
+        <div class="fb"><b class="hot">9 kcal/g</b> — năng lượng đậm đặc nhất · kho dự trữ lớn nhất · hấp thu vitamin A-D-E-K · tạo hormone · bôi trơn khớp · giữ ẩm da · <b>não bộ 60% là chất béo</b></div>
+      </div>
+      <div class="fcard card">
+        <div class="fh" style="color:var(--ok)"><svg class="ic" style="background:#E2F0E5;color:var(--ok)"><use href="#i-check" class="icon"/></svg><h3>Chưa bão hòa — ưu tiên</h3><span class="k">02</span></div>
+        <div class="fb">Omega-9 đơn · Omega-3/6 đa → tăng HDL, giảm LDL. Dầu hạt &amp; hạt nguyên hạt (oliu, hạnh nhân, lanh, lạc, vừng) · mỡ cá giàu Omega-3</div>
+      </div>
+      <div class="fcard card">
+        <div class="fh" style="color:var(--warn)"><svg class="ic" style="background:#FAF0D8;color:var(--warn)"><use href="#i-alert" class="icon"/></svg><h3>Bão hòa — giới hạn</h3><span class="k">03</span></div>
+        <div class="fb">Chuỗi thẳng, dễ đông đặc: mỡ động vật · bơ · dầu dừa, dầu cọ → tắc mạch, xơ vữa động mạch, bệnh tim mạch</div>
+      </div>
+      <div class="fcard card">
+        <div class="fh" style="color:var(--bad)"><svg class="ic" style="background:#F7E3DF;color:var(--bad)"><use href="#i-ban" class="icon"/></svg><h3>Trans fat — loại bỏ hoàn toàn</h3><span class="k">04</span></div>
+        <div class="fb">Dầu hydro hóa thành bơ thực vật (margarine) · dầu chiên đi chiên lại nhiều lần → chất béo chuyển hóa + gốc tự do gây hại</div>
+      </div>
+    </div>
+    <div class="band">
+      <svg class="bi"><use href="#i-scale" class="icon"/></svg>
+      <span style="display:flex;align-items:center;gap:14px;width:100%"><b>Tỷ lệ vàng:</b>
+        <span style="flex:1;display:flex;height:26px;border-radius:8px;overflow:hidden;font-family:var(--mono);font-size:12.5px;color:#fff;font-weight:600">
+          <span style="flex:2;background:var(--green-deep);display:flex;align-items:center;justify-content:center">2/3 thực vật</span>
+          <span style="flex:1;background:var(--accent);display:flex;align-items:center;justify-content:center">1/3 động vật</span>
+        </span>
+        <span>Calo từ béo: <b class="hot">20–30%/ngày</b> · bổ sung Omega-3 giảm mỡ máu, hỗ trợ trí não</span>
+      </span>
+    </div>
+  </div>
+  <div class="pagenum">14 / 23</div>
+</section>
+
+<!-- SLIDE 15 · CHOLESTEROL -->
+<section class="slide" id="s15">
+  <header class="head">
+    <div class="eyebrow">Chương 13 · Cholesterol</div>
+    <h1 class="stitle">HDL đưa cholesterol ra, LDL đẩy vào mạch</h1>
+  </header>
+  <div class="body-area" style="flex-direction:column;gap:13px">
+    <div class="split" style="height:auto;flex:1">
+      <div class="pane light" style="border-top:6px solid var(--ok)">
+        <div class="pk">HDL · High-Density — cholesterol tốt</div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <svg style="width:44px;height:44px;color:var(--ok);flex:0 0 auto"><use href="#i-up" class="icon"/></svg>
+          <h3 class="bt" style="color:var(--green-deep)">Ra khỏi máu → về gan</h3>
+        </div>
+        <div class="pi"><span>Nhiều protein — lấy cholesterol thừa từ tế bào, mảng bám đưa về gan</span></div>
+        <div class="pi"><span>Bảo vệ thành mạch · chống xơ vữa · ngăn bệnh tim mạch</span></div>
+      </div>
+      <div class="pane light" style="border-top:6px solid var(--bad)">
+        <div class="pk">LDL · Low-Density — cholesterol xấu</div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <svg style="width:44px;height:44px;color:var(--bad);flex:0 0 auto"><use href="#i-down" class="icon"/></svg>
+          <h3 class="bt" style="color:var(--green-deep)">Vào máu → mảng bám</h3>
+        </div>
+        <div class="pi"><span>Ít protein, nhiều cholesterol &amp; chất béo → tích tụ, xơ vữa động mạch</span></div>
+        <div class="pi"><span>Hậu quả: nhồi máu cơ tim · đột quỵ. Nguyên nhân LDL cao: béo xấu · thừa cân · di truyền</span></div>
+      </div>
+    </div>
+    <div class="band">
+      <svg class="bi"><use href="#i-cell" class="icon"/></svg>
+      <span>Cơ thể chứa <b class="hot">~100g cholesterol</b> — gan sinh ra &amp; điều hòa chính (chuyển thành acid mật). Cần thiết: tạo hormone · vitamin D · acid mật · giữ màng tế bào. <b>Giữ mức khỏe mạnh:</b> hạn chế mỡ động vật &amp; đường bột tinh chế · tăng vận động · kiểm tra mỡ máu định kỳ</span>
+    </div>
+  </div>
+  <div class="pagenum">15 / 23</div>
+</section>
+
+<!-- SLIDE 16 · VITAMIN -->
+<section class="slide" id="s16">
+  <header class="head">
+    <div class="eyebrow">Chương 14 · Vitamin</div>
+    <h1 class="stitle">Vitamin tan nước cần bổ sung mỗi ngày</h1>
+  </header>
+  <div class="body-area" style="flex-direction:column;gap:13px;justify-content:center">
+    <div class="tblwrap">
+      <table class="tb">
+        <tr><th style="width:17%">Nhóm</th><th style="width:22%">Các loại</th><th style="width:31%">Đặc điểm</th><th>Lưu ý</th></tr>
+        <tr><td><b>Tan trong nước</b></td><td>Nhóm B (B1–B12) + C</td><td>Chuyển hóa nhanh · đào thải qua nước tiểu · lưu trữ thấp · dễ mất khi rửa, ngâm, luộc</td><td><b>Bổ sung hàng ngày</b></td></tr>
+        <tr><td><b>Tan trong dầu</b></td><td>A · D · E · K</td><td>Chuyển hóa chậm · dự trữ lớn ở gan · không cần bổ sung daily qua bữa ăn</td><td>Quá liều chế phẩm → <b>ngộ độc</b></td></tr>
+      </table>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px">
+      <div class="fcard card" style="padding:11px 12px;gap:3px"><div style="font-family:var(--mono);font-weight:700;color:var(--green)">A</div><div class="fb" style="font-size:12.3px">Thiếu → suy giảm thị lực, mù lòa</div></div>
+      <div class="fcard card" style="padding:11px 12px;gap:3px"><div style="font-family:var(--mono);font-weight:700;color:var(--green)">D</div><div class="fb" style="font-size:12.3px">Thiếu → còi xương, loãng xương</div></div>
+      <div class="fcard card" style="padding:11px 12px;gap:3px"><div style="font-family:var(--mono);font-weight:700;color:var(--green)">B1</div><div class="fb" style="font-size:12.3px">Thiếu → tê phù Beriberi, suy tim</div></div>
+      <div class="fcard card" style="padding:11px 12px;gap:3px"><div style="font-family:var(--mono);font-weight:700;color:var(--green)">B9</div><div class="fb" style="font-size:12.3px">Thiếu → dị tật ống thần kinh thai nhi</div></div>
+      <div class="fcard card" style="padding:11px 12px;gap:3px"><div style="font-family:var(--mono);font-weight:700;color:var(--green)">B12</div><div class="fb" style="font-size:12.3px">Thiếu → thiếu máu ác tính</div></div>
+      <div class="fcard card" style="padding:11px 12px;gap:3px"><div style="font-family:var(--mono);font-weight:700;color:var(--green)">C</div><div class="fb" style="font-size:12.3px">Thiếu → chảy máu chân răng, lâu lành vết thương</div></div>
+    </div>
+  </div>
+  <div class="band">
+    <svg class="bi"><use href="#i-sun" class="icon"/></svg>
+    <span><b>Nguồn:</b> rau xanh · trái cây · ngũ cốc nguyên hạt · sữa — riêng D từ ánh nắng, K từ lợi khuẩn. Ăn <b class="hot">10–15 loại/ngày</b> · viên bổ sung uống trong hoặc ngay sau bữa ăn</span>
+  </div>
+  <div class="pagenum">16 / 23</div>
+</section>
+
+<!-- SLIDE 17 · KHOÁNG CHẤT -->
+<section class="slide" id="s17">
+  <header class="head">
+    <div class="eyebrow">Chương 15 · Các khoáng chất</div>
+    <h1 class="stitle"><em>7 khoáng đa lượng</em> và đội quân vi lượng</h1>
+  </header>
+  <div class="body-area">
+    <div class="cg three">
+      <div class="fcard card">
+        <div class="fh"><svg class="ic"><use href="#i-shield" class="icon"/></svg><h3>Khoáng đa lượng</h3></div>
+        <div class="chip hot" style="align-self:flex-start">7 loại · &gt;250mg/ngày</div>
+        <div class="mini-list">
+          <div class="mi"><span><b>Canxi</b> — xương răng, cơ tim, chống chuột rút</span></div>
+          <div class="mi"><span><b>Magie</b> — cơ, dây thần kinh, miễn dịch</span></div>
+          <div class="mi"><span><b>Natri &amp; Kali</b> — thẩm thấu, cân bằng nước</span></div>
+          <div class="mi"><span><b>Clorit</b> — thành phần HCl dạ dày · <b>Photpho</b> — xương, giải phóng năng lượng · <b>Lưu huỳnh</b> — xây mô mới</span></div>
+        </div>
+      </div>
+      <div class="fcard card">
+        <div class="fh"><svg class="ic"><use href="#i-gear" class="icon"/></svg><h3>Khoáng vi lượng</h3></div>
+        <div class="chip" style="align-self:flex-start">&lt;20mg/ngày</div>
+        <div class="mini-list">
+          <div class="mi"><span><b>Sắt</b> — hemoglobin, chống thiếu máu nhược sắc</span></div>
+          <div class="mi"><span><b>I-ốt</b> — hormone tuyến giáp, trí tuệ</span></div>
+          <div class="mi"><span><b>Kẽm</b> — enzyme, miễn dịch · <b>Đồng</b> — chuyển hóa sắt</span></div>
+          <div class="mi"><span><b>Selen</b> — chống oxy hóa, chống stress · <b>Flo</b> — răng chắc khỏe</span></div>
+        </div>
+      </div>
+      <div class="fcard card">
+        <div class="fh"><svg class="ic"><use href="#i-leaf" class="icon"/></svg><h3>Nguồn cung cấp</h3></div>
+        <div class="mini-list">
+          <div class="mi"><span>Đất → nước ngầm → cây trồng → chuỗi thức ăn — cơ thể là “tiểu vũ trụ”</span></div>
+          <div class="mi"><span>Ngũ cốc nguyên hạt · rau củ · thịt cá trứng sữa · nước khoáng tự nhiên</span></div>
+          <div class="mi"><span>Viên bổ sung thường kèm vitamin — tăng hấp thu</span></div>
+          <div class="mi"><span><b>Khoáng hữu cơ</b> (từ thức ăn) ≠ <b>khoáng vô cơ</b> (viên uống, nước)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pagenum">17 / 23</div>
+</section>
+<!-- SLIDE 18 · PHYTONUTRIENTS -->
+<section class="slide" id="s18">
+  <header class="head">
+    <div class="eyebrow">Chương 16 · Dưỡng chất thực vật Phytonutrients</div>
+    <h1 class="stitle"><em>5 nhóm</em> dưỡng chất thực vật — ăn đủ màu</h1>
+  </header>
+  <div class="body-area" style="flex-direction:column;gap:13px;justify-content:center">
+    <div class="tblwrap">
+      <table class="tb">
+        <tr><th style="width:19%">Nhóm</th><th style="width:44%">Tác dụng nổi bật</th><th>Nguồn thực phẩm</th></tr>
+        <tr><td><b>Terpen</b></td><td>Khử trùng, kháng khuẩn · chống oxy hóa, kháng viêm, chống ung thư</td><td>Vỏ cam chanh · anh đào · bạc hà, húng quế, hương thảo</td></tr>
+        <tr><td><b>Sulfide hữu cơ</b></td><td>Kháng sinh tự nhiên · chống chất sinh ung thư</td><td>Hành · tỏi · rau họ cải (súp lơ, bắp cải)</td></tr>
+        <tr><td><b>Saponin</b></td><td>Giảm cholesterol máu · tăng miễn dịch, kháng nấm</td><td>Nhân sâm · khoai môn · đậu nành · quinoa</td></tr>
+        <tr><td><b>Carotenoid</b></td><td>Ức chế tế bào ung thư · tăng thị lực, bảo vệ da</td><td>Cà rốt · cà chua · gấc — màu đỏ, cam, vàng, xanh đậm</td></tr>
+        <tr><td><b>Polyphenol</b></td><td>Chống viêm, tốt tim mạch · “estrogen thực vật” giảm triệu chứng tiền mãn kinh</td><td>Trà xanh · cà phê · táo, nho · các loại đậu · việt quất</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="band">
+    <svg class="bi"><use href="#i-leaf" class="icon"/></svg>
+    <span><b>Chung:</b> trung hòa gốc tự do — thủ phạm lão hóa, ung thư, tim mạch · là thức ăn cho lợi khuẩn. <b>Dùng hiệu quả:</b> ăn “cầu vồng” đủ màu · ăn cả vỏ. <b class="hot">Siêu thực phẩm:</b> súp lơ xanh · đậu nành · việt quất · cải xoăn · tỏi · hạt chia · trà xanh…</span>
+  </div>
+  <div class="pagenum">18 / 23</div>
+</section>
+
+<!-- SLIDE 19 · ACID & KIỀM -->
+<section class="slide" id="s19">
+  <header class="head">
+    <div class="eyebrow">Chương 17 · Thực phẩm tạo acid &amp; tạo kiềm</div>
+    <h1 class="stitle"><em>pH máu 7,4</em> — ranh giới sự sống tế bào</h1>
+  </header>
+  <div class="body-area">
+    <div class="bn" style="grid-template-columns:38% 1fr">
+      <div class="bn-hero">
+        <div class="v" style="font-size:150px">pH<small>&nbsp;7,4</small></div>
+        <div class="cap">Máu luôn kiềm nhẹ: 7,35–7,45</div>
+        <div class="sub">hệ thống đệm điều tiết liên tục để duy trì mức pH này</div>
+      </div>
+      <div class="bn-list">
+        <div class="li acc"><span><b class="lead">Thang pH 0–14: &lt;7 acid · =7 trung tính · &gt;7 kiềm</b>
+          <div style="margin-top:10px">
+            <div class="phbar" style="position:relative;height:24px;border-radius:8px;background:linear-gradient(90deg,var(--bad) 0%,var(--warn) 46%,var(--ok) 54%,#2B6CB0 100%)"></div>
+            <div class="mono" style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:4px"><span>0 · acid</span><span>7</span><span>kiềm · 14</span></div>
+          </div></span></div>
+        <div class="li"><span><b class="lead">Ngoài ngưỡng sống: pH &lt;<span class="hot">6,8</span> hoặc &gt;<span class="hot">7,8</span></b><p>Tế bào ngừng hoạt động — cơ thể không thể tồn tại</p></span></div>
+        <div class="li"><span><b class="lead">Nguy cơ acid hóa: ~80% thức ăn &amp; nước uống tạo acid</b><p>Cộng thêm: viêm nhiễm · căng thẳng, mệt mỏi · thừa cân béo phì · lối sống hiện đại</p></span></div>
+        <div class="li"><span><b class="lead">Khi cơ thể dư acid</b><p>Giảm hấp thu khoáng &amp; dinh dưỡng · giảm khả năng chống ung thư · mệt mỏi — càng acid hóa càng dễ mắc bệnh</p></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="pagenum">19 / 23</div>
+</section>
+
+<!-- SLIDE 20 · ĐÓI & THÈM ĂN -->
+<section class="slide" id="s20">
+  <header class="head">
+    <div class="eyebrow">Chương 18 · Cơn đói &amp; sự thèm ăn</div>
+    <h1 class="stitle">Đói là sinh lý, thèm ăn là tâm lý</h1>
+  </header>
+  <div class="body-area" style="flex-direction:column;gap:13px">
+    <div class="split" style="height:auto;flex:1">
+      <div class="pane dark">
+        <div class="pk">Cơn đói · Sinh lý</div>
+        <h3 class="bt">Ghrelin <span style="color:var(--accent-on-dark)">↑</span> — nhu cầu thật của cơ thể</h3>
+        <div class="pi"><span>Đường máu thấp · dạ dày rỗng co bóp cồn cào — bắt đầu <b>~2 giờ sau ăn</b></span></div>
+        <div class="pi"><span>Kích thích nội tại + bên ngoài (mùi vị, hình ảnh đồ ăn)</span></div>
+      </div>
+      <div class="pane light">
+        <div class="pk">Thèm ăn · Tâm lý</div>
+        <h3 class="bt" style="color:var(--green-deep)">Cảm xúc — không phải đói thật</h3>
+        <div class="pi"><span>Stress, buồn chán, ký ức · nhìn thấy, ngửi thấy món ngon</span></div>
+        <div class="pi"><span>Hướng đồ giàu <b>đường + chất béo</b> → giải phóng hóa chất hưng phấn não</span></div>
+      </div>
+    </div>
+    <div class="band">
+      <svg class="bi"><use href="#i-target" class="icon"/></svg>
+      <span><b>Tín hiệu no:</b> Insulin + Leptin báo não — béo phì dễ “kháng Leptin” → ăn không kiểm soát. <b class="hot">5 công cụ kiểm soát:</b> nước (no giả) · chất xơ (no lâu) · protein · hương bưởi · tập cường độ cao. <b>Lưu ý:</b> Nicotin giảm tín hiệu đói</span>
+    </div>
+  </div>
+  <div class="pagenum">20 / 23</div>
+</section>
+
+<!-- SLIDE 21 · DINH DƯỠNG & VẬN ĐỘNG -->
+<section class="slide" id="s21">
+  <header class="head">
+    <div class="eyebrow">Chương 19 · Kết hợp dinh dưỡng &amp; vận động</div>
+    <h1 class="stitle">Bát phở <em>450 kcal</em> cần 2 giờ tập mới hết</h1>
+  </header>
+  <div class="body-area">
+    <div class="cg two">
+      <div class="fcard card">
+        <div class="fh"><svg class="ic"><use href="#i-calc" class="icon"/></svg><h3>Cân bằng calo minh họa</h3><span class="k">01</span></div>
+        <div class="mini-list">
+          <div class="mi"><span>Đi bộ nhanh 1km ≈ <b>45–50 kcal</b></span></div>
+          <div class="mi"><span>Bát cơm ~200 kcal = đi bộ <b>4km</b></span></div>
+          <div class="mi"><span>Bát phở 400–450 kcal ≈ <b class="hot">2 giờ tập cường độ cao</b> — chỉ tập mà không kiểm soát ăn thì khó giảm cân</span></div>
+        </div>
+      </div>
+      <div class="fcard card">
+        <div class="fh"><svg class="ic"><use href="#i-target" class="icon"/></svg><h3>Nguyên tắc vừa đủ</h3><span class="k">02</span></div>
+        <div class="fb">Thiếu vận động → béo phì, bệnh chuyển hóa, thoái hóa · quá sức → gốc tự do, lão hóa sớm</div>
+        <div class="fb">Khuyến nghị: <b class="hot">40–60 phút/ngày</b> vận động tích cực — nhịp tim, nhịp thở tăng cao hơn bình thường</div>
+      </div>
+      <div class="fcard card">
+        <div class="fh"><svg class="ic"><use href="#i-pulse" class="icon"/></svg><h3>Cardio vs Gym</h3><span class="k">03</span></div>
+        <div class="mini-list">
+          <div class="mi"><span><b>Cardio</b> (chạy bộ, đạp xe, nhảy dây, aerobic, Zumba): đốt calo, giảm cân</span></div>
+          <div class="mi"><span><b>Gym</b>: tăng cơ bắp, phom người săn chắc — đốt calo ít hơn nhưng chỉnh cấu trúc cơ thể</span></div>
+        </div>
+      </div>
+      <div class="fcard card">
+        <div class="fh"><svg class="ic"><use href="#i-bowl" class="icon"/></svg><h3>Dinh dưỡng vòng tập</h3><span class="k">04</span></div>
+        <div class="mini-list">
+          <div class="mi"><span><b>Trước:</b> ăn nhẹ dạng shake giàu đạm, vitamin, chống oxy hóa</span></div>
+          <div class="mi"><span><b>Trong:</b> bổ sung nước + điện giải</span></div>
+          <div class="mi"><span><b>Sau (≤2 giờ):</b> Whey protein + vitamin C, collagen — tái tạo cơ bắp</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pagenum">21 / 23</div>
+</section>
+
+<!-- SLIDE 22 · FAQ -->
+<section class="slide" id="s22">
+  <header class="head">
+    <div class="eyebrow">Phần FAQ · Quan điểm tác giả — 15 năm nghiên cứu, tư vấn hàng ngàn người</div>
+    <h1 class="stitle"><em>8 câu hỏi</em> thực tế — chốt lời giải cho HLV</h1>
+  </header>
+  <div class="body-area">
+    <div class="tblwrap" style="align-self:center">
+      <table class="tb">
+        <tr><th style="width:17%">Nhóm câu hỏi</th><th style="width:26%">Câu hỏi tiêu biểu</th><th>Chốt trả lời</th></tr>
+        <tr><td><b>Sản phẩm &amp; chữa bệnh</b><br><span class="mono" style="font-size:11px;color:var(--muted)">Q1–Q3</span></td><td>“Có chữa được bệnh X, Y, Z? Có an toàn không?”</td><td>“Thân cường thì bệnh nhược”: thuốc là <b>ngoại lực</b> — tuân thủ bác sĩ; dinh dưỡng nuôi <b>nội lực</b> (đề kháng, tự chữa lành). Đánh giá an toàn: thành phần · chứng nhận · FDA, WHO, Bộ Y tế</td></tr>
+        <tr><td><b>Đậu nành</b><br><span class="mono" style="font-size:11px;color:var(--muted)">Q4–Q5</span></td><td>“Gây ung thư vú? Bệnh tuyến giáp dùng được không?”</td><td>Isoflavone là <b>estrogen thực vật</b> — giúp cân bằng, không phải estrogen gây hại; phụ nữ Châu Á ăn nhiều tỷ lệ ung thư vú thấp hơn. Bệnh giáp: dùng được — vừa phải, nấu chín kỹ (Goitrogens bất hoạt ở nhiệt cao)</td></tr>
+        <tr><td><b>GMO &amp; vi chất</b><br><span class="mono" style="font-size:11px;color:var(--muted)">Q6–Q7</span></td><td>“GMO an toàn không? Bổ sung có sợ thừa?”</td><td>Hơn <b>100 nhà khoa học Nobel</b> + WHO, FDA, FAO khẳng định GMO an toàn. Cần bổ sung vì thực phẩm nghèo dưỡng chất — RDA chỉ là ngưỡng tối thiểu, ngưỡng tối ưu mới khỏe nhất; vi chất dư được đào thải</td></tr>
+        <tr><td><b>Nhóm dinh dưỡng NC</b><br><span class="mono" style="font-size:11px;color:var(--muted)">Q8</span></td><td>“Tự dùng tại nhà được không?”</td><td>Được — nhưng Nutrition Club mang thêm thay đổi <b>thói quen ăn uống, vận động</b> và môi trường hỗ trợ tinh thần → kết quả bền vững hơn</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="pagenum">22 / 23</div>
+</section>
+
+<!-- SLIDE 23 · KẾT LUẬN -->
+<section class="slide" id="s23" style="padding-top:52px">
+  <svg class="deco" style="width:300px;height:300px;right:-60px;top:-70px" aria-hidden="true"><use href="#i-leaf" class="icon"/></svg>
+  <div class="center-stage">
+    <div class="eyebrow" style="justify-content:center">Kết luận</div>
+    <div style="margin-top:22px;font-size:52px;font-weight:900;line-height:1.12;letter-spacing:-.015em;text-wrap:balance;color:var(--green-deep)">Dinh dưỡng là gốc<br>của sức khỏe</div>
+    <div style="margin-top:26px;display:flex;gap:11px;justify-content:center;flex-wrap:wrap">
+      <span class="chip hot" style="font-size:15px;padding:9px 18px">Nhất nước</span>
+      <span class="chip hot" style="font-size:15px;padding:9px 18px">Nhì dinh dưỡng</span>
+      <span class="chip" style="font-size:15px;padding:9px 18px">Tam vận động</span>
+      <span class="chip" style="font-size:15px;padding:9px 18px">Thứ tư di truyền</span>
+    </div>
+    <div class="cover-sub" style="margin-top:26px;font-weight:700;color:var(--green-deep)">Học ăn — Học nói — Học dạy</div>
+    <div class="cover-note" style="max-width:640px">Khỏe chính mình → giúp người khác khỏe → cộng đồng khỏe mạnh.<br>Chăm sóc sức khỏe chủ động bắt đầu từ những bữa ăn đúng cách hôm nay.</div>
+    <div style="margin-top:30px;font-size:19px;font-style:italic;color:var(--ink-soft)">Bạn đã kiểm soát được <b class="hot" style="font-style:normal;font-size:24px">“80%”</b> sức khỏe của chính mình chưa?</div>
+  </div>
+  <div class="pagenum">23 / 23</div>
+</section>
+
+</div></div>
+
+<div class="progress"><div class="fill" id="barfill"></div></div>
+<div class="stage-ui counter" id="counter">01 / 23</div>
+<div class="stage-ui navbtns">
+  <button type="button" id="prevBtn" aria-label="Slide trước">‹</button>
+  <button type="button" id="nextBtn" aria-label="Slide sau">›</button>
+</div>
+<div class="stage-ui hint" id="hint">←/→ chuyển slide · F toàn màn hình · Ctrl+P xuất PDF</div>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var bar=document.getElementById('barfill'),
+      counter=document.getElementById('counter'),
+      hint=document.getElementById('hint');
+  var cur=0;
+  function pad(n){return (n<10?'0':'')+n}
+  function go(n){
+    cur=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach(function(s,i){s.classList.toggle('active',i===cur)});
+    bar.style.width=((cur+1)/slides.length*100)+'%';
+    counter.textContent=pad(cur+1)+' / '+slides.length;
+    if(history.replaceState)history.replaceState(null,'','#'+(cur+1));
+  }
+  function fit(){
+    var sc=document.querySelector('.scaler');
+    var k=Math.min(window.innerWidth/1300,window.innerHeight/760);
+    sc.style.transform='scale('+k+')';
+  }
+  document.getElementById('prevBtn').addEventListener('click',function(){go(cur-1)});
+  document.getElementById('nextBtn').addEventListener('click',function(){go(cur+1)});
+  window.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){go(cur+1);e.preventDefault()}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){go(cur-1);e.preventDefault()}
+    else if(e.key==='Home'){go(0)}
+    else if(e.key==='End'){go(slides.length-1)}
+    else if(e.key==='f'||e.key==='F'){
+      if(document.fullscreenElement){document.exitFullscreen()}else{document.documentElement.requestFullscreen()}
+    }
+  });
+  var tx=null;
+  window.addEventListener('touchstart',function(e){tx=e.touches[0].clientX},{passive:true});
+  window.addEventListener('touchend',function(e){
+    if(tx===null)return;
+    var dx=e.changedTouches[0].clientX-tx;
+    if(Math.abs(dx)>50)go(cur+(dx<0?1:-1));
+    tx=null;
+  },{passive:true});
+  setTimeout(function(){hint.classList.add('fade')},6000);
+  window.addEventListener('resize',fit);
+  fit();
+  var m=location.hash.match(/^#(\d+)$/), q=location.search.match(/[?&]slide=(\d+)/);
+  go(q?parseInt(q[1],10)-1:(m?parseInt(m[1],10)-1:0));
+})();
+</script>
